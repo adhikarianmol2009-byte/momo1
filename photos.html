@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pukuli Site - Photos</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="photos-page">
+  <div class="floating-emojis" aria-hidden="true">
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+  </div>
+  <header class="site-header">
+    <div class="brand">
+      <h1>Pukuli Site</h1>
+      <p>Your romantic photo album collection, styled like a keepsake book.</p>
+      <div class="header-hearts">♥  ♥  ♥  ♥  ♥</div>
+    </div>
+    <nav class="site-nav">
+      <a href="index.html">Home</a>
+      <a href="photos.html" class="active">Photos</a>
+      <a href="videos.html">Videos</a>
+      <a href="future.html">Future</a>
+      <a href="events.html">Events</a>
+    </nav>
+  </header>
+
+  <main class="content album-page">
+    <section class="album-hero album-hero-photo">
+      <div class="hero-copy">
+        <span class="label">Photo Album</span>
+        <h2>Build a beautiful collection of your favorite memories.</h2>
+        <p>Each album feels like a front-cover keepsake, with a soft wallpaper and a gallery of links that capture the moment.</p>
+      </div>
+      <div class="hero-art">
+        <div class="hero-card wallpaper-photo">
+          <div class="card-badge">Featured Album</div>
+          <h3>Sunset Blossoms</h3>
+          <p>Warm tones, heartfelt photos, and a dreamy cover to match.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="album-collection">
+      <div class="collection-panel">
+        <div class="album-card large wallpaper-photo">
+          <div class="card-badge">New Album</div>
+          <h3>Create your next cover</h3>
+          <p>Enter a title and add your photo links to save your collection like an album.</p>
+        </div>
+
+        <div class="collection-form">
+          <h3>Create a new photo album</h3>
+          <form id="photoForm" class="item-form">
+            <input type="text" id="photoTitle" placeholder="Album title" required />
+            <textarea id="photoUrls" placeholder="Paste photo URLs here, one per line." rows="5" required></textarea>
+            <button type="submit">Save Album</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="item-list album-grid" id="photoList"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Keep your photo albums organized like a real scrapbook.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

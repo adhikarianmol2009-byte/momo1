@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pukuli Site - Future</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="future-page">
+  <div class="floating-emojis" aria-hidden="true">
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+    <span class="emoji"></span>
+  </div>
+  <header class="site-header">
+    <div class="brand">
+      <h1>Pukuli Site</h1>
+      <p>Your dreamboard for future surprises and celebration plans.</p>
+      <div class="header-hearts">♥  ♥  ♥  ♥  ♥</div>
+    </div>
+    <nav class="site-nav">
+      <a href="index.html">Home</a>
+      <a href="photos.html">Photos</a>
+      <a href="videos.html">Videos</a>
+      <a href="future.html" class="active">Future</a>
+      <a href="events.html">Events</a>
+    </nav>
+  </header>
+
+  <main class="content album-page">
+    <section class="album-hero album-hero-future">
+      <div class="hero-copy">
+        <span class="label">Future Album</span>
+        <h2>Design a beautiful book of ideas and plans.</h2>
+        <p>Each entry becomes a page in your personal keepsake album, with a cover to inspire what’s coming next.</p>
+      </div>
+      <div class="hero-art">
+        <div class="hero-card wallpaper-future">
+          <div class="card-badge">Dreambook</div>
+          <h3>Secret Wishes</h3>
+          <p>Plan dreamy surprises, gifts, and moments with a romantic cover.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="album-collection">
+      <div class="collection-panel">
+        <div class="album-card large wallpaper-future">
+          <div class="card-badge">Dream Cover</div>
+          <h3>New future page</h3>
+          <p>Save your idea as a themed collection entry in your album.</p>
+        </div>
+
+        <div class="collection-form">
+          <h3>Add a future plan</h3>
+          <form id="futureForm" class="item-form">
+            <input type="text" id="futureTitle" placeholder="Plan title" required />
+            <textarea id="futureNote" placeholder="Describe the plan" rows="4" required></textarea>
+            <button type="submit">Save Plan</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="item-list album-grid" id="futureList"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Keep every plan and surprise arranged like a romantic collection.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
