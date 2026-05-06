@@ -1,5 +1,5 @@
 const API_BASE = 'https://pukuli-api.adhikarianmol2009.workers.dev';
-const POLL_INTERVAL = 5000;
+const POLL_INTERVAL = 2000;
 
 const storageKeys = {
   photos: 'pukuli_photos',
