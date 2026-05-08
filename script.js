@@ -1,3 +1,4 @@
+// v2
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 const JSONBIN_API_KEY = '$2a$10$iHniE2NUal6QRDiWsl.Qn.DUpO0bjVo3su3s7U6azL9bWxOWWBFb2';
 const JSONBIN_BASE = 'https://api.jsonbin.io/v3';
