@@ -1,5 +1,12 @@
-const API_BASE = 'https://pukuli-api.adhikarianmol2009.workers.dev';
-const POLL_INTERVAL = 2000;
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const JSONBIN_API_KEY = '$2a$10$iHniE2NUal6QRDiWsl.Qn.DUpO0bjVo3su3s7U6azL9bWxOWWBFb2';
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3';
+const POLL_INTERVAL = 3000;
+
+// Bin IDs will be created on first run and stored in localStorage
+const BIN_IDS_KEY = 'pukuli_bin_ids';
+
+let binIds = JSON.parse(localStorage.getItem(BIN_IDS_KEY) || '{}');
 
 const storageKeys = {
   photos: 'pukuli_photos',
@@ -10,31 +17,49 @@ const storageKeys = {
   bbbNote: 'pukuli_note_bbb'
 };
 
-async function kvGet(key) {
+// ─── JSONBIN HELPERS ──────────────────────────────────────────────────────────
+async function binGet(name) {
   try {
-    const res = await fetch(`${API_BASE}/api/get?key=${key}`);
-    const json = await res.json();
-    return json.value;
-  } catch { return null; }
-}
-
-async function kvSet(key, value) {
-  try {
-    await fetch(`${API_BASE}/api/set`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, value }),
+    if (!binIds[name]) return null;
+    const res = await fetch(`${JSONBIN_BASE}/b/${binIds[name]}/latest`, {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
     });
-  } catch (err) { console.warn('KV set failed:', err); }
-}
-
-async function kvAll() {
-  try {
-    const res = await fetch(`${API_BASE}/api/all`);
-    return await res.json();
+    const json = await res.json();
+    return json.record?.value ?? null;
   } catch { return null; }
 }
 
+async function binSet(name, value) {
+  try {
+    if (!binIds[name]) {
+      // Create new bin
+      const res = await fetch(`${JSONBIN_BASE}/b`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': JSONBIN_API_KEY,
+          'X-Bin-Name': `pukuli_${name}`,
+          'X-Bin-Private': 'false'
+        },
+        body: JSON.stringify({ value })
+      });
+      const json = await res.json();
+      binIds[name] = json.metadata.id;
+      localStorage.setItem(BIN_IDS_KEY, JSON.stringify(binIds));
+    } else {
+      await fetch(`${JSONBIN_BASE}/b/${binIds[name]}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': JSONBIN_API_KEY
+        },
+        body: JSON.stringify({ value })
+      });
+    }
+  } catch (err) { console.warn('binSet failed:', err); }
+}
+
+// ─── LOCAL STORAGE HELPERS ────────────────────────────────────────────────────
 function loadData(key) {
   const raw = localStorage.getItem(key);
   return raw ? JSON.parse(raw) : [];
@@ -53,6 +78,7 @@ function saveText(key, text) {
   localStorage.setItem(key, JSON.stringify(text));
 }
 
+// ─── UTILITIES ────────────────────────────────────────────────────────────────
 function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -135,10 +161,11 @@ function showSyncStatus(message, isError = false) {
   el._timeout = setTimeout(() => { el.style.opacity = '0'; }, 2000);
 }
 
+// ─── PHOTOS ───────────────────────────────────────────────────────────────────
 async function loadPhotoPage() {
-  const serverPhotos = await kvGet('photos');
-  const photos = serverPhotos || loadData(storageKeys.photos);
-  if (serverPhotos) saveData(storageKeys.photos, serverPhotos);
+  const server = await binGet('photos');
+  const photos = server || loadData(storageKeys.photos);
+  if (server) saveData(storageKeys.photos, server);
   renderList('photoList', photos, createPhotoItem);
 
   const form = document.getElementById('photoForm');
@@ -153,22 +180,23 @@ async function loadPhotoPage() {
     const entry = { title, urls };
     photos.unshift(entry);
     saveData(storageKeys.photos, photos);
-    await kvSet('photos', photos);
+    await binSet('photos', photos);
     showSyncStatus('Photos synced ✓');
     form.reset();
     renderList('photoList', photos, createPhotoItem);
   });
 
   setInterval(async () => {
-    const updated = await kvGet('photos');
+    const updated = await binGet('photos');
     if (updated) { saveData(storageKeys.photos, updated); renderList('photoList', updated, createPhotoItem); }
   }, POLL_INTERVAL);
 }
 
+// ─── VIDEOS ───────────────────────────────────────────────────────────────────
 async function loadVideoPage() {
-  const serverVideos = await kvGet('videos');
-  const videos = serverVideos || loadData(storageKeys.videos);
-  if (serverVideos) saveData(storageKeys.videos, serverVideos);
+  const server = await binGet('videos');
+  const videos = server || loadData(storageKeys.videos);
+  if (server) saveData(storageKeys.videos, server);
   renderList('videoList', videos, createVideoItem);
 
   const form = document.getElementById('videoForm');
@@ -183,22 +211,23 @@ async function loadVideoPage() {
     const entry = { title, urls };
     videos.unshift(entry);
     saveData(storageKeys.videos, videos);
-    await kvSet('videos', videos);
+    await binSet('videos', videos);
     showSyncStatus('Videos synced ✓');
     form.reset();
     renderList('videoList', videos, createVideoItem);
   });
 
   setInterval(async () => {
-    const updated = await kvGet('videos');
+    const updated = await binGet('videos');
     if (updated) { saveData(storageKeys.videos, updated); renderList('videoList', updated, createVideoItem); }
   }, POLL_INTERVAL);
 }
 
+// ─── FUTURE ───────────────────────────────────────────────────────────────────
 async function loadFuturePage() {
-  const serverFuture = await kvGet('future');
-  const plans = serverFuture || loadData(storageKeys.future);
-  if (serverFuture) saveData(storageKeys.future, serverFuture);
+  const server = await binGet('future');
+  const plans = server || loadData(storageKeys.future);
+  if (server) saveData(storageKeys.future, server);
   renderList('futureList', plans, createFutureItem);
 
   const form = document.getElementById('futureForm');
@@ -213,22 +242,23 @@ async function loadFuturePage() {
     const entry = { title, note };
     plans.unshift(entry);
     saveData(storageKeys.future, plans);
-    await kvSet('future', plans);
+    await binSet('future', plans);
     showSyncStatus('Plans synced ✓');
     form.reset();
     renderList('futureList', plans, createFutureItem);
   });
 
   setInterval(async () => {
-    const updated = await kvGet('future');
+    const updated = await binGet('future');
     if (updated) { saveData(storageKeys.future, updated); renderList('futureList', updated, createFutureItem); }
   }, POLL_INTERVAL);
 }
 
+// ─── EVENTS ───────────────────────────────────────────────────────────────────
 async function loadEventsPage() {
-  const serverEvents = await kvGet('events');
-  const events = (serverEvents || loadData(storageKeys.events)).sort((a, b) => new Date(a.date) - new Date(b.date));
-  if (serverEvents) saveData(storageKeys.events, serverEvents);
+  const server = await binGet('events');
+  const events = (server || loadData(storageKeys.events)).sort((a, b) => new Date(a.date) - new Date(b.date));
+  if (server) saveData(storageKeys.events, server);
   renderList('eventList', events, createEventItem);
 
   const form = document.getElementById('eventForm');
@@ -245,25 +275,26 @@ async function loadEventsPage() {
     const entry = { title, date, details, attachment };
     eventsData.unshift(entry);
     saveData(storageKeys.events, eventsData);
-    await kvSet('events', eventsData);
+    await binSet('events', eventsData);
     showSyncStatus('Event synced ✓');
     form.reset();
     renderList('eventList', eventsData.sort((a, b) => new Date(a.date) - new Date(b.date)), createEventItem);
   });
 
   setInterval(async () => {
-    const updated = await kvGet('events');
+    const updated = await binGet('events');
     if (updated) { saveData(storageKeys.events, updated); renderList('eventList', updated.sort((a, b) => new Date(a.date) - new Date(b.date)), createEventItem); }
   }, POLL_INTERVAL);
 }
 
+// ─── NOTES ────────────────────────────────────────────────────────────────────
 async function loadIndexNotes() {
   const bbgTextarea = document.getElementById('noteBbg');
   const bbbTextarea = document.getElementById('noteBbb');
   const saveBbg = document.getElementById('saveNoteBbg');
   const saveBbb = document.getElementById('saveNoteBbb');
 
-  const [bbgNote, bbbNote] = await Promise.all([kvGet('note_bbg'), kvGet('note_bbb')]);
+  const [bbgNote, bbbNote] = await Promise.all([binGet('note_bbg'), binGet('note_bbb')]);
 
   if (bbgTextarea) bbgTextarea.value = bbgNote ?? loadText(storageKeys.bbgNote);
   if (bbbTextarea) bbbTextarea.value = bbbNote ?? loadText(storageKeys.bbbNote);
@@ -272,7 +303,7 @@ async function loadIndexNotes() {
     saveBbg.addEventListener('click', async () => {
       const note = bbgTextarea.value.trim();
       saveText(storageKeys.bbgNote, note);
-      await kvSet('note_bbg', note);
+      await binSet('note_bbg', note);
       showSyncStatus('BBG note sent ✓');
       saveBbg.textContent = 'Sent!';
       setTimeout(() => { saveBbg.textContent = 'Save BBG Note'; }, 1200);
@@ -283,7 +314,7 @@ async function loadIndexNotes() {
     saveBbb.addEventListener('click', async () => {
       const note = bbbTextarea.value.trim();
       saveText(storageKeys.bbbNote, note);
-      await kvSet('note_bbb', note);
+      await binSet('note_bbb', note);
       showSyncStatus('BBB note sent ✓');
       saveBbb.textContent = 'Sent!';
       setTimeout(() => { saveBbb.textContent = 'Save BBB Note'; }, 1200);
@@ -291,15 +322,16 @@ async function loadIndexNotes() {
   }
 
   setInterval(async () => {
-    const [latestBbg, latestBbb] = await Promise.all([kvGet('note_bbg'), kvGet('note_bbb')]);
+    const [latestBbg, latestBbb] = await Promise.all([binGet('note_bbg'), binGet('note_bbb')]);
     if (bbgTextarea && latestBbg !== null && document.activeElement !== bbgTextarea) bbgTextarea.value = latestBbg;
     if (bbbTextarea && latestBbb !== null && document.activeElement !== bbbTextarea) bbbTextarea.value = latestBbb;
   }, POLL_INTERVAL);
 }
 
+// ─── HOME ─────────────────────────────────────────────────────────────────────
 async function loadHomePage() {
-  const serverEvents = await kvGet('events');
-  const allEvents = serverEvents || loadData(storageKeys.events);
+  const server = await binGet('events');
+  const allEvents = server || loadData(storageKeys.events);
   const now = new Date();
   now.setHours(0, 0, 0, 0);
 
@@ -331,6 +363,7 @@ async function loadHomePage() {
   }
 }
 
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 function initPage() {
   setActiveNav();
   if (document.getElementById('photoForm')) loadPhotoPage();
